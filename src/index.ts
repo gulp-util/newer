@@ -8,6 +8,7 @@ import PluginError from "plugin-error";
 
 import type File from "vinyl";
 import type { TransformCallback } from "stream";
+import type { Options } from "./types";
 
 const PLUGIN_NAME = "gulp-newer";
 
@@ -60,7 +61,7 @@ class Newer extends Transform {
 	 */
 	_extraStats: fs.Stats = null;
 
-	constructor(options) {
+	constructor(options: Options) {
 		super();
 		Transform.call(this, { objectMode: true });
 
@@ -71,9 +72,7 @@ class Newer extends Transform {
 			);
 		}
 
-		if (typeof options === "string") {
-			options = { dest: options };
-		} else if (options.dest && typeof options.dest !== "string") {
+		if (options.dest && typeof options.dest !== "string") {
 			throw new PluginError(PLUGIN_NAME, "Requires a dest string");
 		}
 
@@ -274,6 +273,9 @@ class Newer extends Transform {
 /**
  * Only pass through source files that are newer than the provided destination.
  */
-export = function (options) {
+export = function (options: Options | string) {
+	if (typeof options === "string") {
+		return new Newer({ dest: options });
+	}
 	return new Newer(options);
 };
