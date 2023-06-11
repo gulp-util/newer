@@ -1,13 +1,13 @@
-var Transform = require("stream").Transform;
-var fs = require("fs");
-var path = require("path");
-var util = require("util");
-var glob = require("glob");
+const Transform = require("stream").Transform;
+const fs = require("fs");
+const path = require("path");
+const util = require("util");
+const glob = require("glob");
 
-var Q = require("kew");
-var PluginError = require("plugin-error");
+const Q = require("kew");
+const PluginError = require("plugin-error");
 
-var PLUGIN_NAME = "gulp-newer";
+const PLUGIN_NAME = "gulp-newer";
 
 function Newer(options) {
 	Transform.call(this, { objectMode: true });
@@ -109,20 +109,20 @@ function Newer(options) {
 	this._extraStats = null;
 
 	if (options.extra) {
-		var extraFiles = [];
-		var timestamp = this._timestamp;
-		for (var i = 0; i < options.extra.length; ++i) {
+		const extraFiles = [];
+		const timestamp = this._timestamp;
+		for (let i = 0; i < options.extra.length; ++i) {
 			extraFiles.push(Q.nfcall(glob, options.extra[i]));
 		}
 		this._extraStats = Q.all(extraFiles)
 			.then(function (fileArrays) {
 				// First collect all the files in all the glob result arrays
-				var allFiles = [];
-				var i;
+				let allFiles = [];
+				let i;
 				for (i = 0; i < fileArrays.length; ++i) {
 					allFiles = allFiles.concat(fileArrays[i]);
 				}
-				var extraStats = [];
+				const extraStats = [];
 				for (i = 0; i < allFiles.length; ++i) {
 					extraStats.push(Q.nfcall(fs.stat, allFiles[i]));
 				}
@@ -130,8 +130,8 @@ function Newer(options) {
 			})
 			.then(function (resolvedStats) {
 				// We get all the file stats here; find the *latest* modification.
-				var latestStat = resolvedStats[0];
-				for (var j = 1; j < resolvedStats.length; ++j) {
+				let latestStat = resolvedStats[0];
+				for (let j = 1; j < resolvedStats.length; ++j) {
 					if (resolvedStats[j][timestamp] > latestStat[timestamp]) {
 						latestStat = resolvedStats[j];
 					}
@@ -166,7 +166,7 @@ Newer.prototype._transform = function (srcFile, encoding, done) {
 		done(new PluginError(PLUGIN_NAME, "Expected a source file with stats"));
 		return;
 	}
-	var self = this;
+	const self = this;
 	Q.resolve([this._destStats, this._extraStats])
 		.spread(function (destStats, extraStats) {
 			if (
@@ -175,16 +175,16 @@ Newer.prototype._transform = function (srcFile, encoding, done) {
 				self._map
 			) {
 				// stat dest/relative file
-				var relative = srcFile.relative;
-				var ext = path.extname(relative);
-				var destFileRelative = self._ext
+				const relative = srcFile.relative;
+				const ext = path.extname(relative);
+				let destFileRelative = self._ext
 					? relative.substr(0, relative.length - ext.length) +
 					  self._ext
 					: relative;
 				if (self._map) {
 					destFileRelative = self._map(destFileRelative);
 				}
-				var destFileJoined = self._dest
+				const destFileJoined = self._dest
 					? path.join(self._dest, destFileRelative)
 					: destFileRelative;
 				return Q.all([Q.nfcall(fs.stat, destFileJoined), extraStats]);
@@ -206,8 +206,8 @@ Newer.prototype._transform = function (srcFile, encoding, done) {
 			}
 		})
 		.spread(function (destFileStats, extraFileStats) {
-			var timestamp = self._timestamp;
-			var newer =
+			const timestamp = self._timestamp;
+			let newer =
 				!destFileStats ||
 				srcFile.stat[timestamp] > destFileStats[timestamp];
 			// If *any* extra file is newer than a destination file, then ALL

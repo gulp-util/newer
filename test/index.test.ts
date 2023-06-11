@@ -1,18 +1,16 @@
-/* eslint-env mocha */
+const Transform = require("stream").Transform;
+const fs = require("fs");
+const path = require("path");
 
-var Transform = require("stream").Transform;
-var fs = require("fs");
-var path = require("path");
+const chai = require("chai");
+const Vinyl = require("vinyl");
+const mock = require("mock-fs");
 
-var chai = require("chai");
-var Vinyl = require("vinyl");
-var mock = require("mock-fs");
-
-var newer = require("./index.js");
+const newer = require("./index.js");
 
 chai.config.includeStack = true;
 
-var assert = chai.assert;
+const assert = chai.assert;
 
 /**
  * Test utility function.  Create File instances for each of the provided paths
@@ -35,7 +33,7 @@ function write(stream, paths) {
 
 describe("newer()", function () {
 	it("creates a transform stream", function () {
-		var stream = newer("foo");
+		const stream = newer("foo");
 		assert.instanceOf(stream, Transform);
 	});
 
@@ -121,9 +119,9 @@ describe("newer()", function () {
 		});
 
 		it("must not be passed into stream", function (done) {
-			var stream = newer({ dest: "collected", extra: "imported" });
+			const stream = newer({ dest: "collected", extra: "imported" });
 
-			var paths = ["main"];
+			const paths = ["main"];
 
 			stream.on("data", function (file) {
 				assert.notEqual(file.path, path.resolve("imported"));
@@ -135,11 +133,11 @@ describe("newer()", function () {
 		});
 
 		it('must let other files through stream if an "extra" is newer', function (done) {
-			var stream = newer({ dest: "collected", extra: "imported" });
+			const stream = newer({ dest: "collected", extra: "imported" });
 
-			var paths = ["main"];
+			const paths = ["main"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -167,11 +165,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through all files", function (done) {
-			var stream = newer("new/dir");
+			const stream = newer("new/dir");
 
-			var paths = ["source1", "source2", "source3"];
+			const paths = ["source1", "source2", "source3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -200,11 +198,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through all files", function (done) {
-			var stream = newer("dest/concat");
+			const stream = newer("dest/concat");
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -233,11 +231,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through all files", function (done) {
-			var stream = newer("dest");
+			const stream = newer("dest");
 
-			var paths = ["source1", "source2", "source3"];
+			const paths = ["source1", "source2", "source3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -272,11 +270,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through all files", function (done) {
-			var stream = newer("dest");
+			const stream = newer("dest");
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -293,11 +291,11 @@ describe("newer()", function () {
 		});
 
 		it("passes through all files, checking ctime", function (done) {
-			var stream = newer({ dest: "dest", ctime: true });
+			const stream = newer({ dest: "dest", ctime: true });
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -344,11 +342,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through two newer files", function (done) {
-			var stream = newer("dest");
+			const stream = newer("dest");
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.notEqual(file.path, path.resolve("file2"));
 				++calls;
@@ -365,11 +363,11 @@ describe("newer()", function () {
 		});
 
 		it("passes through two newer files, checking ctime", function (done) {
-			var stream = newer({ dest: "dest", ctime: true });
+			const stream = newer({ dest: "dest", ctime: true });
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.notEqual(file.path, path.resolve("file2"));
 				++calls;
@@ -426,11 +424,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through one newer file", function (done) {
-			var stream = newer("dest");
+			const stream = newer("dest");
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve("file2"));
 				++calls;
@@ -447,11 +445,11 @@ describe("newer()", function () {
 		});
 
 		it("passes through one newer file, checking ctime", function (done) {
-			var stream = newer({ dest: "dest", ctime: true });
+			const stream = newer({ dest: "dest", ctime: true });
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve("file2"));
 				++calls;
@@ -498,11 +496,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through all source files", function (done) {
-			var stream = newer("dest/output");
+			const stream = newer("dest/output");
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -519,11 +517,11 @@ describe("newer()", function () {
 		});
 
 		it("passes through all source files, checking ctime", function (done) {
-			var stream = newer({ dest: "dest/output", ctime: true });
+			const stream = newer({ dest: "dest/output", ctime: true });
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -570,11 +568,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through all source files", function (done) {
-			var stream = newer("dest/output");
+			const stream = newer("dest/output");
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -591,11 +589,11 @@ describe("newer()", function () {
 		});
 
 		it("passes through all source files, checking ctime", function (done) {
-			var stream = newer({ dest: "dest/output", ctime: true });
+			const stream = newer({ dest: "dest/output", ctime: true });
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -642,11 +640,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through all source files", function (done) {
-			var stream = newer("dest/output");
+			const stream = newer("dest/output");
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -663,11 +661,11 @@ describe("newer()", function () {
 		});
 
 		it("passes through all source files, checking ctime", function (done) {
-			var stream = newer({ dest: "dest/output", ctime: true });
+			const stream = newer({ dest: "dest/output", ctime: true });
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve(paths[calls]));
 				++calls;
@@ -714,11 +712,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through no source files", function (done) {
-			var stream = newer("dest/output");
+			const stream = newer("dest/output");
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function () {
 				done(new Error("Expected no source files"));
 				++calls;
@@ -735,11 +733,11 @@ describe("newer()", function () {
 		});
 
 		it("passes through no source files, checking ctime", function (done) {
-			var stream = newer({ dest: "dest/output", ctime: true });
+			const stream = newer({ dest: "dest/output", ctime: true });
 
-			var paths = ["file1", "file2", "file3"];
+			const paths = ["file1", "file2", "file3"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function () {
 				done(new Error("Expected no source files"));
 				++calls;
@@ -786,11 +784,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through one newer file", function (done) {
-			var stream = newer({ dest: "dest", ext: ".ext2" });
+			const stream = newer({ dest: "dest", ext: ".ext2" });
 
-			var paths = ["file1.ext1", "file2.ext1"];
+			const paths = ["file1.ext1", "file2.ext1"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve("file2.ext1"));
 				++calls;
@@ -807,11 +805,11 @@ describe("newer()", function () {
 		});
 
 		it("passes through one newer file, checking ctime", function (done) {
-			var stream = newer({ dest: "dest", ext: ".ext2", ctime: true });
+			const stream = newer({ dest: "dest", ext: ".ext2", ctime: true });
 
-			var paths = ["file1.ext1", "file2.ext1"];
+			const paths = ["file1.ext1", "file2.ext1"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve("file2.ext1"));
 				++calls;
@@ -858,16 +856,16 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("passes through one newer file", function (done) {
-			var stream = newer({
+			const stream = newer({
 				dest: "dest",
 				map: function (destPath) {
 					return destPath.replace(".ext1", ".ext2");
 				},
 			});
 
-			var paths = ["file1.ext1", "file2.ext1"];
+			const paths = ["file1.ext1", "file2.ext1"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve("file2.ext1"));
 				++calls;
@@ -884,7 +882,7 @@ describe("newer()", function () {
 		});
 
 		it("passes through one newer file, checking ctime", function (done) {
-			var stream = newer({
+			const stream = newer({
 				dest: "dest",
 				map: function (destPath) {
 					return destPath.replace(".ext1", ".ext2");
@@ -892,9 +890,9 @@ describe("newer()", function () {
 				ctime: true,
 			});
 
-			var paths = ["file1.ext1", "file2.ext1"];
+			const paths = ["file1.ext1", "file2.ext1"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve("file2.ext1"));
 				++calls;
@@ -911,7 +909,7 @@ describe("newer()", function () {
 		});
 
 		it("allows people to join to dest themselves", function (done) {
-			var stream = newer({
+			const stream = newer({
 				map: function (destPath) {
 					return path.join(
 						"dest",
@@ -920,9 +918,9 @@ describe("newer()", function () {
 				},
 			});
 
-			var paths = ["file1.ext1", "file2.ext1"];
+			const paths = ["file1.ext1", "file2.ext1"];
 
-			var calls = 0;
+			let calls = 0;
 			stream.on("data", function (file) {
 				assert.equal(file.path, path.resolve("file2.ext1"));
 				++calls;
@@ -951,9 +949,9 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it('in "data" handlers', function (done) {
-			var stream = newer("dest");
+			const stream = newer("dest");
 
-			var err = new Error("test");
+			const err = new Error("test");
 
 			stream.on("data", function () {
 				throw err;
