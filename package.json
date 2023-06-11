@@ -1,0 +1,51 @@
+{
+	"name": "@gulp-util/newer",
+	"version": "0.0.1",
+	"description": "",
+	"license": "",
+	"repository": {
+		"type": "git",
+		"url": ""
+	},
+	"bugs": {
+		"url": ""
+	},
+	"contributors": [
+		"PWall <git@pwall.me>"
+	],
+	"typings": "types/index.d.ts",
+	"main": "lib/index.js",
+	"devDependencies": {
+		"@types/expect": "^1.20.2",
+		"@types/mocha": "^10.0.1",
+		"@types/node": "^20.2.5",
+		"@typescript-eslint/eslint-plugin": "^5.59.8",
+		"@typescript-eslint/parser": "^5.59.8",
+		"mocha": "^10.2.0",
+		"expect": "^29.5.0",
+		"eslint": "^8.41.0",
+		"ts-node": "^10.9.1",
+		"typescript": "^5.0.4"
+	},
+	"scripts": {
+		"lint": "eslint .",
+		"dev": "tsc --watch",
+		"build": "tsc",
+		"build:transpile": "tsc || true",
+		"build:test": "tsc -p ./test || true",
+		"pretest": "pnpm run /build:.*/",
+		"test": "mocha",
+		"test:ts-node": "mocha -r ts-node/register",
+		"test:transpile": "mocha -r ts-node/register/transpile-only"
+	},
+	"files": [
+		"lib",
+		"types",
+		"LICENSE",
+		"LICENSE.MIT"
+	],
+	"keywords": [
+		"gulp"
+	],
+	"packageManager": "pnpm@7.27.0"
+}
