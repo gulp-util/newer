@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@types/chai': ^4.1.2
   '@types/expect': ^1.20.2
   '@types/glob': ^7.0.3
   '@types/mocha': ^10.0.1
@@ -28,6 +29,7 @@ dependencies:
   plugin-error: 2.0.1
 
 devDependencies:
+  '@types/chai': 4.3.5
   '@types/expect': 1.20.4
   '@types/mocha': 10.0.1
   '@types/node': 20.3.0
@@ -212,6 +214,10 @@ packages:
 
   /@tsconfig/node16/1.0.4:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
+    dev: true
+
+  /@types/chai/4.3.5:
+    resolution: {integrity: sha512-mEo1sAde+UCE6b2hxn332f1g1E8WfYRu6p5SvTKr2ZKC1f7gFJXk4h5PyGP9Dt6gCaG8y8XhwnXWC6Iy2cmBng==}
     dev: true
 
   /@types/expect/1.20.4:
