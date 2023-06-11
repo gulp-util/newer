@@ -6,9 +6,60 @@ import glob from "glob";
 import Q from "kew";
 import PluginError from "plugin-error";
 
+import type File from "vinyl";
+import type { TransformCallback } from "stream";
+
 const PLUGIN_NAME = "gulp-newer";
 
 class Newer extends Transform {
+	/**
+	 * Path to destination directory or file.
+	 */
+	_dest: string;
+
+	/**
+	 * Optional extension for destination files.
+	 */
+	_ext: string;
+
+	/**
+	 * Optional function for mapping relative source files to destination files.
+	 */
+	_map: (input: string) => string;
+
+	/**
+	 * Key for the timestamp in files' stats object
+	 */
+	_timestamp: "ctime" | "mtime";
+
+	/**
+	 * Promise for the dest file/directory stats.
+	 */
+	_destStats: fs.Stats;
+
+	/**
+	 * If the provided dest is a file, we want to pass through all files if any
+	 * one of the source files is newer than the dest.  To support this, source
+	 * files need to be buffered until a newer file is found.  When a newer file
+	 * is found, buffered source files are flushed (and the `_all` flag is set).
+	 */
+	_bufferedFiles: File[] = null;
+
+	/**
+	 * Indicates that all files should be passed through.  This is set when the
+	 * provided dest is a file and we have already encountered a newer source
+	 * file.  When true, all remaining source files should be passed through.
+	 */
+	_all = false;
+
+	/**
+	 * Indicates that there are extra files (configuration files, etc.)
+	 * that are not to be fed into the stream, but that should force
+	 * all files to be rebuilt if *any* are older than one of the extra
+	 * files.
+	 */
+	_extraStats: fs.Stats = null;
+
 	constructor(options) {
 		super();
 		Transform.call(this, { objectMode: true });
@@ -52,62 +103,17 @@ class Newer extends Transform {
 			}
 		}
 
-		/**
-		 * Path to destination directory or file.
-		 * @type {string}
-		 */
 		this._dest = options.dest;
 
-		/**
-		 * Optional extension for destination files.
-		 * @type {string}
-		 */
 		this._ext = options.ext;
 
-		/**
-		 * Optional function for mapping relative source files to destination files.
-		 * @type {function(string): string}
-		 */
 		this._map = options.map;
 
-		/**
-		 * Key for the timestamp in files' stats object
-		 * @type {string}
-		 */
 		this._timestamp = options.ctime ? "ctime" : "mtime";
 
-		/**
-		 * Promise for the dest file/directory stats.
-		 * @type {[type]}
-		 */
 		this._destStats = this._dest
 			? Q.nfcall(fs.stat, this._dest)
 			: Q.resolve(null);
-
-		/**
-		 * If the provided dest is a file, we want to pass through all files if any
-		 * one of the source files is newer than the dest.  To support this, source
-		 * files need to be buffered until a newer file is found.  When a newer file
-		 * is found, buffered source files are flushed (and the `_all` flag is set).
-		 * @type {[type]}
-		 */
-		this._bufferedFiles = null;
-
-		/**
-		 * Indicates that all files should be passed through.  This is set when the
-		 * provided dest is a file and we have already encountered a newer source
-		 * file.  When true, all remaining source files should be passed through.
-		 * @type {boolean}
-		 */
-		this._all = false;
-
-		/**
-		 * Indicates that there are extra files (configuration files, etc.)
-		 * that are not to be fed into the stream, but that should force
-		 * all files to be rebuilt if *any* are older than one of the extra
-		 * files.
-		 */
-		this._extraStats = null;
 
 		if (options.extra) {
 			const extraFiles = [];
@@ -116,9 +122,9 @@ class Newer extends Transform {
 				extraFiles.push(Q.nfcall(glob, options.extra[i]));
 			}
 			this._extraStats = Q.all(extraFiles)
-				.then(function (fileArrays) {
+				.then(function (fileArrays: string[][]) {
 					// First collect all the files in all the glob result arrays
-					let allFiles = [];
+					let allFiles = <string[]>[];
 					let i;
 					for (i = 0; i < fileArrays.length; ++i) {
 						allFiles = allFiles.concat(fileArrays[i]);
@@ -129,7 +135,7 @@ class Newer extends Transform {
 					}
 					return Q.all(extraStats);
 				})
-				.then(function (resolvedStats) {
+				.then(function (resolvedStats: fs.Stats[]) {
 					// We get all the file stats here; find the *latest* modification.
 					let latestStat = resolvedStats[0];
 					for (let j = 1; j < resolvedStats.length; ++j) {
@@ -141,7 +147,7 @@ class Newer extends Transform {
 					}
 					return latestStat;
 				})
-				.fail(function (error) {
+				.fail(function (error: NodeJS.ErrnoException) {
 					if (error && error.path) {
 						throw new PluginError(
 							PLUGIN_NAME,
@@ -164,7 +170,7 @@ class Newer extends Transform {
 	 * @param {string} encoding Encoding (ignored).
 	 * @param {function(Error, File)} done Callback.
 	 */
-	_transform(srcFile, encoding, done) {
+	_transform(srcFile: File, encoding: string, done: TransformCallback) {
 		if (!srcFile || !srcFile.stat) {
 			done(
 				new PluginError(
@@ -176,7 +182,7 @@ class Newer extends Transform {
 		}
 		const self = this;
 		Q.resolve([this._destStats, this._extraStats])
-			.spread(function (destStats, extraStats) {
+			.spread(function (destStats: fs.Stats, extraStats: fs.Stats) {
 				if (
 					(destStats && destStats.isDirectory()) ||
 					self._ext ||
@@ -207,7 +213,7 @@ class Newer extends Transform {
 					return [destStats, extraStats];
 				}
 			})
-			.fail(function (err) {
+			.fail(function (err: NodeJS.ErrnoException) {
 				if (err.code === "ENOENT") {
 					// dest file or directory doesn't exist, pass through all
 					return Q.resolve([null, this._extraStats]);
@@ -216,7 +222,10 @@ class Newer extends Transform {
 					return Q.reject(err);
 				}
 			})
-			.spread(function (destFileStats, extraFileStats) {
+			.spread(function (
+				destFileStats: fs.Stats,
+				extraFileStats: fs.Stats
+			) {
 				const timestamp = self._timestamp;
 				let newer =
 					!destFileStats ||
@@ -255,9 +264,8 @@ class Newer extends Transform {
 
 	/**
 	 * Remove references to buffered files.
-	 * @param {function(Error)} done Callback.
 	 */
-	_flush(done) {
+	_flush(done: TransformCallback) {
 		this._bufferedFiles = null;
 		done();
 	}
@@ -265,8 +273,6 @@ class Newer extends Transform {
 
 /**
  * Only pass through source files that are newer than the provided destination.
- * @param {Object} options An options object or path to destination.
- * @return {Newer} A transform stream.
  */
 export = function (options) {
 	return new Newer(options);
