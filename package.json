@@ -18,7 +18,7 @@
 	"dependencies": {
 		"glob": "^7.0.3",
 		"kew": "^0.7.0",
-		"plugin-error": "^0.1.2"
+		"plugin-error": "^2.0.1"
 	},
 	"devDependencies": {
 		"@types/expect": "^1.20.2",
