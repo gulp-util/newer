@@ -61,7 +61,7 @@ describe("newer()", function () {
 		});
 
 		it("makes the dest config optional", function () {
-			expect(() => newer({ map: function () {} })).not.toThrow();
+			expect(() => newer({ map: (str) => str })).not.toThrow();
 		});
 	});
 
