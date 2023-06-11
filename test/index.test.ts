@@ -11,10 +11,8 @@ import newer from "..";
 /**
  * Test utility function.  Create File instances for each of the provided paths
  * and write to the provided stream.  Call stream.end() when done.
- * @param {stream.Transform} stream Transform stream.
- * @param {Array.<string>} paths Array of file paths.
  */
-function write(stream, paths) {
+function write(stream: Transform, paths: string[]) {
 	paths.forEach(function (filePath) {
 		stream.write(
 			new Vinyl({
