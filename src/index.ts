@@ -80,53 +80,53 @@ class Newer extends Transform {
 			: Q.resolve(null);
 
 		if (options.extra) {
-			const extraFiles = [];
-			const timestamp = this._timestamp;
-			for (let i = 0; i < options.extra.length; ++i) {
-				extraFiles.push(Q.nfcall(glob, options.extra[i]));
-			}
-			this._extraStats = Q.all(extraFiles)
-				.then(function (fileArrays: string[][]) {
-					// First collect all the files in all the glob result arrays
-					let allFiles = <string[]>[];
-					let i;
-					for (i = 0; i < fileArrays.length; ++i) {
-						allFiles = allFiles.concat(fileArrays[i]);
-					}
-					const extraStats = [];
-					for (i = 0; i < allFiles.length; ++i) {
-						extraStats.push(Q.nfcall(fs.stat, allFiles[i]));
-					}
-					return Q.all(extraStats);
-				})
-				.then(function (resolvedStats: fs.Stats[]) {
-					// We get all the file stats here; find the *latest* modification.
-					let latestStat = resolvedStats[0];
-					for (let j = 1; j < resolvedStats.length; ++j) {
-						if (
-							resolvedStats[j][timestamp] > latestStat[timestamp]
-						) {
-							latestStat = resolvedStats[j];
-						}
-					}
-					return latestStat;
-				})
-				.fail(function (error: NodeJS.ErrnoException) {
-					if (error && error.path) {
-						throw new PluginError(
-							PLUGIN_NAME,
-							"Failed to read stats for an extra file: " +
-								error.path
-						);
-					} else {
-						throw new PluginError(
-							PLUGIN_NAME,
-							"Failed to stat extra files; unknown error: " +
-								error
-						);
-					}
-				});
+			this._getExtraStats(options);
 		}
+	}
+
+	_getExtraStats(options: Options) {
+		const extraFiles = [];
+		const timestamp = this._timestamp;
+		for (let i = 0; i < options.extra.length; ++i) {
+			extraFiles.push(Q.nfcall(glob, options.extra[i]));
+		}
+		this._extraStats = Q.all(extraFiles)
+			.then(function (fileArrays: string[][]) {
+				// First collect all the files in all the glob result arrays
+				let allFiles = <string[]>[];
+				let i;
+				for (i = 0; i < fileArrays.length; ++i) {
+					allFiles = allFiles.concat(fileArrays[i]);
+				}
+				const extraStats = [];
+				for (i = 0; i < allFiles.length; ++i) {
+					extraStats.push(Q.nfcall(fs.stat, allFiles[i]));
+				}
+				return Q.all(extraStats);
+			})
+			.then(function (resolvedStats: fs.Stats[]) {
+				// We get all the file stats here; find the *latest* modification.
+				let latestStat = resolvedStats[0];
+				for (let j = 1; j < resolvedStats.length; ++j) {
+					if (resolvedStats[j][timestamp] > latestStat[timestamp]) {
+						latestStat = resolvedStats[j];
+					}
+				}
+				return latestStat;
+			})
+			.fail(function (error: NodeJS.ErrnoException) {
+				if (error && error.path) {
+					throw new PluginError(
+						PLUGIN_NAME,
+						"Failed to read stats for an extra file: " + error.path
+					);
+				} else {
+					throw new PluginError(
+						PLUGIN_NAME,
+						"Failed to stat extra files; unknown error: " + error
+					);
+				}
+			});
 	}
 
 	_checkOptions(options: Options) {
