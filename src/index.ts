@@ -1,11 +1,11 @@
-const Transform = require("stream").Transform;
-const fs = require("fs");
-const path = require("path");
-const util = require("util");
-const glob = require("glob");
+import { Transform } from "stream";
+import fs from "fs";
+import path from "path";
+import util from "util";
+import glob from "glob";
 
-const Q = require("kew");
-const PluginError = require("plugin-error");
+import Q from "kew";
+import PluginError from "plugin-error";
 
 const PLUGIN_NAME = "gulp-newer";
 

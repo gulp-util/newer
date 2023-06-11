@@ -1,12 +1,12 @@
-const Transform = require("stream").Transform;
-const fs = require("fs");
-const path = require("path");
+import { Transform } from "stream";
+import fs from "fs";
+import path from "path";
 
-const chai = require("chai");
-const Vinyl = require("vinyl");
-const mock = require("mock-fs");
+import chai from "chai";
+import Vinyl from "vinyl";
+import mock from "mock-fs";
 
-const newer = require("..");
+import newer from "..";
 
 chai.config.includeStack = true;
 
