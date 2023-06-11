@@ -65,42 +65,7 @@ class Newer extends Transform {
 		super();
 		Transform.call(this, { objectMode: true });
 
-		if (!options) {
-			throw new PluginError(
-				PLUGIN_NAME,
-				"Requires a dest string or options object"
-			);
-		}
-
-		if (options.dest && typeof options.dest !== "string") {
-			throw new PluginError(PLUGIN_NAME, "Requires a dest string");
-		}
-
-		if (options.ext && typeof options.ext !== "string") {
-			throw new PluginError(PLUGIN_NAME, "Requires ext to be a string");
-		}
-
-		if (options.map && typeof options.map !== "function") {
-			throw new PluginError(PLUGIN_NAME, "Requires map to be a function");
-		}
-
-		if (!options.dest && !options.map) {
-			throw new PluginError(
-				PLUGIN_NAME,
-				"Requires either options.dest or options.map or both"
-			);
-		}
-
-		if (options.extra) {
-			if (typeof options.extra === "string") {
-				options.extra = [options.extra];
-			} else if (!Array.isArray(options.extra)) {
-				throw new PluginError(
-					PLUGIN_NAME,
-					"Requires options.extra to be a string or array"
-				);
-			}
-		}
+		this._checkOptions(options);
 
 		this._dest = options.dest;
 
@@ -163,6 +128,46 @@ class Newer extends Transform {
 				});
 		}
 	}
+
+	_checkOptions(options: Options) {
+		if (!options) {
+			throw new PluginError(
+				PLUGIN_NAME,
+				"Requires a dest string or options object"
+			);
+		}
+
+		if (options.dest && typeof options.dest !== "string") {
+			throw new PluginError(PLUGIN_NAME, "Requires a dest string");
+		}
+
+		if (options.ext && typeof options.ext !== "string") {
+			throw new PluginError(PLUGIN_NAME, "Requires ext to be a string");
+		}
+
+		if (options.map && typeof options.map !== "function") {
+			throw new PluginError(PLUGIN_NAME, "Requires map to be a function");
+		}
+
+		if (!options.dest && !options.map) {
+			throw new PluginError(
+				PLUGIN_NAME,
+				"Requires either options.dest or options.map or both"
+			);
+		}
+
+		if (options.extra) {
+			if (typeof options.extra === "string") {
+				options.extra = [options.extra];
+			} else if (!Array.isArray(options.extra)) {
+				throw new PluginError(
+					PLUGIN_NAME,
+					"Requires options.extra to be a string or array"
+				);
+			}
+		}
+	}
+
 	/**
 	 * Pass through newer files only.
 	 * @param {File} srcFile A vinyl file.
