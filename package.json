@@ -16,6 +16,7 @@
 	"typings": "types/index.d.ts",
 	"main": "lib/index.js",
 	"dependencies": {
+		"@types/glob": "^7.0.3",
 		"glob": "^7.0.3",
 		"kew": "^0.7.0",
 		"plugin-error": "^2.0.1"
