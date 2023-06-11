@@ -32,8 +32,10 @@ describe("newer()", function () {
 	});
 
 	it("requires a string dest or an object with the dest property", function () {
+		// @ts-expect-error Test if arguments missing
 		expect(() => newer()).toThrow();
 
+		// @ts-expect-error Test if argument is wrong type
 		expect(() => newer(123)).toThrow();
 
 		expect(() => newer({})).toThrow();
@@ -41,16 +43,20 @@ describe("newer()", function () {
 
 	describe("config.ext", function () {
 		it("must be a string", function () {
+			// @ts-expect-error Test if ext is wrong type
 			expect(() => newer({ dest: "foo", ext: 1 })).toThrow();
 
+			// @ts-expect-error Test if ext is wrong type
 			expect(() => newer({ dest: "foo", ext: {} })).toThrow();
 		});
 	});
 
 	describe("config.map", function () {
 		it("must be a function", function () {
+			// @ts-expect-error Test if map is wrong type
 			expect(() => newer({ dest: "foo", map: 1 })).toThrow();
 
+			// @ts-expect-error Test if map is wrong type
 			expect(() => newer({ dest: "foo", map: "bar" })).toThrow();
 		});
 
@@ -79,9 +85,11 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("must be a string or an array", function () {
+			// @ts-expect-error Test if extra is wrong type
 			expect(() => newer({ dest: "foo", extra: 1 })).toThrow();
 
 			expect(() =>
+				// @ts-expect-error Test if extra is wrong type
 				newer({ dest: "foo", extra: function () {} })
 			).toThrow();
 
