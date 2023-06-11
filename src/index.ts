@@ -256,6 +256,6 @@ Newer.prototype._flush = function (done) {
  * @param {Object} options An options object or path to destination.
  * @return {Newer} A transform stream.
  */
-module.exports = function (options) {
+export = function (options) {
 	return new Newer(options);
 };
