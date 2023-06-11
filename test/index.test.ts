@@ -6,7 +6,7 @@ const chai = require("chai");
 const Vinyl = require("vinyl");
 const mock = require("mock-fs");
 
-const newer = require("./index.js");
+const newer = require("..");
 
 chai.config.includeStack = true;
 
