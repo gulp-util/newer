@@ -196,7 +196,7 @@ class Newer extends Transform {
 					const relative = srcFile.relative;
 					const ext = path.extname(relative);
 					let destFileRelative = self._ext
-						? relative.substr(0, relative.length - ext.length) +
+						? relative.substring(0, relative.length - ext.length) +
 						  self._ext
 						: relative;
 					if (self._map) {
