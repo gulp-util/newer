@@ -2,15 +2,11 @@ import { Transform } from "stream";
 import fs from "fs";
 import path from "path";
 
-import chai from "chai";
+import expect from "expect";
 import Vinyl from "vinyl";
 import mock from "mock-fs";
 
 import newer from "..";
-
-chai.config.includeStack = true;
-
-const assert = chai.assert;
 
 /**
  * Test utility function.  Create File instances for each of the provided paths
@@ -34,50 +30,34 @@ function write(stream, paths) {
 describe("newer()", function () {
 	it("creates a transform stream", function () {
 		const stream = newer("foo");
-		assert.instanceOf(stream, Transform);
+		expect(stream).toBeInstanceOf(Transform);
 	});
 
 	it("requires a string dest or an object with the dest property", function () {
-		assert.throws(function () {
-			newer();
-		});
+		expect(() => newer()).toThrow();
 
-		assert.throws(function () {
-			newer(123);
-		});
+		expect(() => newer(123)).toThrow();
 
-		assert.throws(function () {
-			newer({});
-		});
+		expect(() => newer({})).toThrow();
 	});
 
 	describe("config.ext", function () {
 		it("must be a string", function () {
-			assert.throws(function () {
-				newer({ dest: "foo", ext: 1 });
-			});
+			expect(() => newer({ dest: "foo", ext: 1 })).toThrow();
 
-			assert.throws(function () {
-				newer({ dest: "foo", ext: {} });
-			});
+			expect(() => newer({ dest: "foo", ext: {} })).toThrow();
 		});
 	});
 
 	describe("config.map", function () {
 		it("must be a function", function () {
-			assert.throws(function () {
-				newer({ dest: "foo", map: 1 });
-			});
+			expect(() => newer({ dest: "foo", map: 1 })).toThrow();
 
-			assert.throws(function () {
-				newer({ dest: "foo", map: "bar" });
-			});
+			expect(() => newer({ dest: "foo", map: "bar" })).toThrow();
 		});
 
 		it("makes the dest config optional", function () {
-			assert.doesNotThrow(function () {
-				newer({ map: function () {} });
-			});
+			expect(() => newer({ map: function () {} })).not.toThrow();
 		});
 	});
 
@@ -101,21 +81,17 @@ describe("newer()", function () {
 		afterEach(mock.restore);
 
 		it("must be a string or an array", function () {
-			assert.throws(function () {
-				newer({ dest: "foo", extra: 1 });
-			});
+			expect(() => newer({ dest: "foo", extra: 1 })).toThrow();
 
-			assert.throws(function () {
-				newer({ dest: "foo", extra: function () {} });
-			});
+			expect(() =>
+				newer({ dest: "foo", extra: function () {} })
+			).toThrow();
 
-			assert.doesNotThrow(function () {
-				newer({ dest: "foo", extra: "extra1" });
-			});
+			expect(() => newer({ dest: "foo", extra: "extra1" })).not.toThrow();
 
-			assert.doesNotThrow(function () {
-				newer({ dest: "foo", extra: ["extra1", "extra2"] });
-			});
+			expect(() =>
+				newer({ dest: "foo", extra: ["extra1", "extra2"] })
+			).not.toThrow();
 		});
 
 		it("must not be passed into stream", function (done) {
@@ -124,7 +100,7 @@ describe("newer()", function () {
 			const paths = ["main"];
 
 			stream.on("data", function (file) {
-				assert.notEqual(file.path, path.resolve("imported"));
+				expect(file.path).not.toEqual(path.resolve("imported"));
 			});
 			stream.on("error", done);
 			stream.on("end", done);
@@ -139,14 +115,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -171,14 +147,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -204,14 +180,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -237,14 +213,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -276,14 +252,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -297,14 +273,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -348,14 +324,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.notEqual(file.path, path.resolve("file2"));
+				expect(file.path).not.toEqual(path.resolve("file2"));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length - 1);
+				expect(calls).toEqual(paths.length - 1);
 				done();
 			});
 
@@ -369,14 +345,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.notEqual(file.path, path.resolve("file2"));
+				expect(file.path).not.toEqual(path.resolve("file2"));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length - 1);
+				expect(calls).toEqual(paths.length - 1);
 				done();
 			});
 
@@ -430,14 +406,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve("file2"));
+				expect(file.path).toEqual(path.resolve("file2"));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, 1);
+				expect(calls).toEqual(1);
 				done();
 			});
 
@@ -451,14 +427,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve("file2"));
+				expect(file.path).toEqual(path.resolve("file2"));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, 1);
+				expect(calls).toEqual(1);
 				done();
 			});
 
@@ -502,14 +478,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -523,14 +499,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -574,14 +550,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -595,14 +571,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -646,14 +622,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -667,14 +643,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve(paths[calls]));
+				expect(file.path).toEqual(path.resolve(paths[calls]));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, paths.length);
+				expect(calls).toEqual(paths.length);
 				done();
 			});
 
@@ -725,7 +701,7 @@ describe("newer()", function () {
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, 0);
+				expect(calls).toEqual(0);
 				done();
 			});
 
@@ -746,7 +722,7 @@ describe("newer()", function () {
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, 0);
+				expect(calls).toEqual(0);
 				done();
 			});
 
@@ -790,14 +766,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve("file2.ext1"));
+				expect(file.path).toEqual(path.resolve("file2.ext1"));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, 1);
+				expect(calls).toEqual(1);
 				done();
 			});
 
@@ -811,14 +787,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve("file2.ext1"));
+				expect(file.path).toEqual(path.resolve("file2.ext1"));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, 1);
+				expect(calls).toEqual(1);
 				done();
 			});
 
@@ -867,14 +843,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve("file2.ext1"));
+				expect(file.path).toEqual(path.resolve("file2.ext1"));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, 1);
+				expect(calls).toEqual(1);
 				done();
 			});
 
@@ -894,14 +870,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve("file2.ext1"));
+				expect(file.path).toEqual(path.resolve("file2.ext1"));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, 1);
+				expect(calls).toEqual(1);
 				done();
 			});
 
@@ -922,14 +898,14 @@ describe("newer()", function () {
 
 			let calls = 0;
 			stream.on("data", function (file) {
-				assert.equal(file.path, path.resolve("file2.ext1"));
+				expect(file.path).toEqual(path.resolve("file2.ext1"));
 				++calls;
 			});
 
 			stream.on("error", done);
 
 			stream.on("end", function () {
-				assert.equal(calls, 1);
+				expect(calls).toEqual(1);
 				done();
 			});
 
@@ -958,7 +934,7 @@ describe("newer()", function () {
 			});
 
 			stream.on("error", function (caught) {
-				assert.equal(caught, err);
+				expect(caught).toEqual(err);
 				done();
 			});
 
