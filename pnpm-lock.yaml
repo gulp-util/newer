@@ -5,6 +5,7 @@ specifiers:
   '@types/expect': ^1.20.2
   '@types/glob': ^7.0.3
   '@types/mocha': ^10.0.1
+  '@types/mock-fs': ^4.4.2
   '@types/node': ^20.2.5
   '@types/vinyl': ^2.0.7
   '@typescript-eslint/eslint-plugin': ^5.59.8
@@ -32,6 +33,7 @@ devDependencies:
   '@types/chai': 4.3.5
   '@types/expect': 1.20.4
   '@types/mocha': 10.0.1
+  '@types/mock-fs': 4.13.1
   '@types/node': 20.3.0
   '@types/vinyl': 2.0.7
   '@typescript-eslint/eslint-plugin': 5.59.9_3cembfv4vokiyn6g4ljynjc5d4
@@ -257,6 +259,12 @@ packages:
 
   /@types/mocha/10.0.1:
     resolution: {integrity: sha512-/fvYntiO1GeICvqbQ3doGDIP97vWmvFt83GKguJ6prmQM2iXZfFcq6YE8KteFyRtX2/h5Hf91BYvPodJKFYv5Q==}
+    dev: true
+
+  /@types/mock-fs/4.13.1:
+    resolution: {integrity: sha512-m6nFAJ3lBSnqbvDZioawRvpLXSaPyn52Srf7OfzjubYbYX8MTUdIgDxQl0wEapm4m/pNYSd9TXocpQ0TvZFlYA==}
+    dependencies:
+      '@types/node': 20.3.0
     dev: true
 
   /@types/node/20.3.0:
