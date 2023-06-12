@@ -160,6 +160,14 @@ class Newer extends Transform {
 		}
 	}
 
+	push(chunk: any, encoding?: BufferEncoding): boolean {
+		try {
+			return super.push(chunk, encoding);
+		} catch (err) {
+			this.emit("error", err);
+		}
+	}
+
 	/**
 	 * Pass through newer files only.
 	 * @param {File} srcFile A vinyl file.
