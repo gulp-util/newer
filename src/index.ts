@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import glob from "glob";
 
-import Q from "kew";
 import PluginError from "plugin-error";
 
 import type File from "vinyl";
@@ -75,8 +74,8 @@ class Newer extends Transform {
 		this._timestamp = options.ctime ? "ctime" : "mtime";
 
 		this._destStats = this._dest
-			? Q.nfcall(fs.stat, this._dest)
-			: Q.resolve(null);
+			? fs.statSync(this._dest, { throwIfNoEntry: false })
+			: null;
 
 		if (options.extra) {
 			this._getExtraStats(options);
@@ -87,45 +86,39 @@ class Newer extends Transform {
 		const extraFiles = [];
 		const timestamp = this._timestamp;
 		for (let i = 0; i < options.extra.length; ++i) {
-			extraFiles.push(Q.nfcall(glob, options.extra[i]));
+			extraFiles.push(glob.sync(options.extra[i]));
 		}
-		this._extraStats = Q.all(extraFiles)
-			.then(function (fileArrays: string[][]) {
-				// First collect all the files in all the glob result arrays
-				let allFiles = <string[]>[];
-				let i;
-				for (i = 0; i < fileArrays.length; ++i) {
-					allFiles = allFiles.concat(fileArrays[i]);
-				}
-				const extraStats = [];
-				for (i = 0; i < allFiles.length; ++i) {
-					extraStats.push(Q.nfcall(fs.stat, allFiles[i]));
-				}
-				return Q.all(extraStats);
-			})
-			.then(function (resolvedStats: fs.Stats[]) {
-				// We get all the file stats here; find the *latest* modification.
-				let latestStat = resolvedStats[0];
-				for (let j = 1; j < resolvedStats.length; ++j) {
-					if (resolvedStats[j][timestamp] > latestStat[timestamp]) {
-						latestStat = resolvedStats[j];
-					}
-				}
-				return latestStat;
-			})
-			.fail(function (error: NodeJS.ErrnoException) {
+
+		let allFiles = <string[]>[];
+		let i;
+		for (i = 0; i < extraFiles.length; ++i) {
+			allFiles = allFiles.concat(extraFiles[i]);
+		}
+		const extraStats = [];
+		for (i = 0; i < allFiles.length; ++i) {
+			try {
+				extraStats.push(fs.statSync(allFiles[i]));
+			} catch (error) {
 				if (error && error.path) {
 					throw new PluginError(
 						PLUGIN_NAME,
 						"Failed to read stats for an extra file: " + error.path
 					);
-				} else {
-					throw new PluginError(
-						PLUGIN_NAME,
-						"Failed to stat extra files; unknown error: " + error
-					);
 				}
-			});
+				throw new PluginError(
+					PLUGIN_NAME,
+					"Failed to stat extra files; unknown error: " + error
+				);
+			}
+		}
+		let latestStat = extraStats[0];
+		for (let j = 1; j < extraStats.length; ++j) {
+			if (extraStats[j][timestamp] > latestStat[timestamp]) {
+				latestStat = extraStats[j];
+			}
+		}
+
+		this._extraStats = latestStat;
 	}
 
 	_checkOptions(options: Options) {
@@ -183,86 +176,73 @@ class Newer extends Transform {
 			);
 			return;
 		}
-		const self = this;
-		Q.resolve([this._destStats, this._extraStats])
-			.spread(function (destStats: fs.Stats, extraStats: fs.Stats) {
-				if (
-					(destStats && destStats.isDirectory()) ||
-					self._ext ||
-					self._map
-				) {
-					// stat dest/relative file
-					const relative = srcFile.relative;
-					const ext = path.extname(relative);
-					let destFileRelative = self._ext
-						? relative.substring(0, relative.length - ext.length) +
-						  self._ext
-						: relative;
-					if (self._map) {
-						destFileRelative = self._map(destFileRelative);
-					}
-					const destFileJoined = self._dest
-						? path.join(self._dest, destFileRelative)
-						: destFileRelative;
-					return Q.all([
-						Q.nfcall(fs.stat, destFileJoined),
-						extraStats,
-					]);
-				} else {
-					// wait to see if any are newer, then pass through all
-					if (!self._bufferedFiles) {
-						self._bufferedFiles = [];
-					}
-					return [destStats, extraStats];
-				}
-			})
-			.fail(function (err: NodeJS.ErrnoException) {
+		let destStats = this._destStats;
+		if (
+			(this._destStats && this._destStats.isDirectory()) ||
+			this._ext ||
+			this._map
+		) {
+			// stat dest/relative file
+			const relative = srcFile.relative;
+			const ext = path.extname(relative);
+			let destFileRelative = this._ext
+				? relative.substring(0, relative.length - ext.length) +
+				  this._ext
+				: relative;
+			if (this._map) {
+				destFileRelative = this._map(destFileRelative);
+			}
+			const destFileJoined = this._dest
+				? path.join(this._dest, destFileRelative)
+				: destFileRelative;
+			try {
+				destStats = fs.statSync(destFileJoined);
+			} catch (err) {
 				if (err.code === "ENOENT") {
 					// dest file or directory doesn't exist, pass through all
-					return Q.resolve([null, this._extraStats]);
+					destStats = null;
 				} else {
 					// unexpected error
-					return Q.reject(err);
+					throw err;
 				}
-			})
-			.spread(function (
-				destFileStats: fs.Stats,
-				extraFileStats: fs.Stats
-			) {
-				const timestamp = self._timestamp;
-				let newer =
-					!destFileStats ||
-					srcFile.stat[timestamp] > destFileStats[timestamp];
-				// If *any* extra file is newer than a destination file, then ALL
-				// are newer.
-				if (
-					extraFileStats &&
-					extraFileStats[timestamp] > destFileStats[timestamp]
-				) {
-					newer = true;
+			}
+		} else {
+			// wait to see if any are newer, then pass through all
+			if (!this._bufferedFiles) {
+				this._bufferedFiles = [];
+			}
+		}
+
+		const timestamp = this._timestamp;
+		let newer =
+			!destStats || srcFile.stat[timestamp] > destStats[timestamp];
+		// If *any* extra file is newer than a destination file, then ALL
+		// are newer.
+		if (
+			this._extraStats &&
+			this._extraStats[timestamp] > destStats[timestamp]
+		) {
+			newer = true;
+		}
+		if (this._all) {
+			this.push(srcFile);
+		} else if (!newer) {
+			if (this._bufferedFiles) {
+				this._bufferedFiles.push(srcFile);
+			}
+		} else {
+			if (this._bufferedFiles) {
+				// flush buffer
+				for (const file of this._bufferedFiles) {
+					this.push(file);
 				}
-				if (self._all) {
-					self.push(srcFile);
-				} else if (!newer) {
-					if (self._bufferedFiles) {
-						self._bufferedFiles.push(srcFile);
-					}
-				} else {
-					if (self._bufferedFiles) {
-						// flush buffer
-						self._bufferedFiles.forEach(function (file) {
-							self.push(file);
-						});
-						self._bufferedFiles.length = 0;
-						// pass through all remaining files as well
-						self._all = true;
-					}
-					self.push(srcFile);
-				}
-				done();
-			})
-			.fail(done)
-			.end();
+				this._bufferedFiles.length = 0;
+				// pass through all remaining files as well
+				this._all = true;
+			}
+			this.push(srcFile);
+		}
+		done();
 	}
 
 	/**
