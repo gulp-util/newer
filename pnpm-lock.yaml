@@ -13,7 +13,6 @@ specifiers:
   expect: ^29.5.0
   glob: ^7.0.3
   gulp: ^3.9.1
-  kew: ^0.7.0
   mocha: ^10.2.0
   mock-fs: ^4.4.2
   plugin-error: ^2.0.1
@@ -25,7 +24,6 @@ dependencies:
   '@types/glob': 7.2.0
   '@types/vinyl': 2.0.7
   glob: 7.2.3
-  kew: 0.7.0
   plugin-error: 2.0.1
 
 devDependencies:
@@ -1925,10 +1923,6 @@ packages:
   /json-stable-stringify-without-jsonify/1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
     dev: true
-
-  /kew/0.7.0:
-    resolution: {integrity: sha512-IG6nm0+QtAMdXt9KvbgbGdvY50RSrw+U4sGZg+KlrSKPJEwVE5JVoI3d7RWfSMdBQneRheeAOj3lIjX5VL/9RQ==}
-    dev: false
 
   /kind-of/3.2.2:
     resolution: {integrity: sha512-NOW9QQXMoZGg/oqnVNoNTTIFEIid1627WCffUBJEdMxYApq7mNE7CpzucIPc+ZQg25Phej7IJSmX3hO+oblOtQ==}
