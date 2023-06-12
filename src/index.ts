@@ -62,8 +62,7 @@ class Newer extends Transform {
 	_extraStats: fs.Stats = null;
 
 	constructor(options: Options) {
-		super();
-		Transform.call(this, { objectMode: true });
+		super({ objectMode: true });
 
 		this._checkOptions(options);
 
