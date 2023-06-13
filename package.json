@@ -11,6 +11,8 @@
 		"url": ""
 	},
 	"contributors": [
+		"Tim Schaub <tim.schaub@gmail.com>",
+		"Tim Mensch <tim-git-tecra@bitgems.com>",
 		"PWall <git@pwall.me>"
 	],
 	"typings": "types/index.d.ts",
