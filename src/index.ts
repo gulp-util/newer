@@ -211,13 +211,12 @@ class Newer extends Transform {
 			try {
 				destStats = fs.statSync(destFileJoined);
 			} catch (err) {
-				if (err.code === "ENOENT") {
-					// dest file or directory doesn't exist, pass through all
-					destStats = null;
-				} else {
+				if (err.code !== "ENOENT") {
 					// unexpected error
 					throw err;
 				}
+				// dest file or directory doesn't exist, pass through all
+				destStats = null;
 			}
 		} else {
 			// wait to see if any are newer, then pass through all
