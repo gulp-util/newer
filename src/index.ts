@@ -169,6 +169,17 @@ class Newer extends Transform {
 		}
 	}
 
+	_isNewer(dest: fs.Stats, src: fs.Stats) {
+		const ts = this._timestamp;
+		if (this._extraStats && this._extraStats[ts] > dest[ts]) {
+			return true;
+		}
+		if (!dest) {
+			return true;
+		}
+		return src[ts] > dest[ts];
+	}
+
 	push(chunk: any, encoding?: BufferEncoding): boolean {
 		try {
 			return super.push(chunk, encoding);
@@ -225,17 +236,8 @@ class Newer extends Transform {
 			}
 		}
 
-		const timestamp = this._timestamp;
-		let newer =
-			!destStats || srcFile.stat[timestamp] > destStats[timestamp];
-		// If *any* extra file is newer than a destination file, then ALL
-		// are newer.
-		if (
-			this._extraStats &&
-			this._extraStats[timestamp] > destStats[timestamp]
-		) {
-			newer = true;
-		}
+		const newer = this._isNewer(destStats, srcFile.stat);
+
 		if (this._all) {
 			this.push(srcFile);
 		} else if (!newer) {
