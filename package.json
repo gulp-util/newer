@@ -5,10 +5,10 @@
 	"license": "",
 	"repository": {
 		"type": "git",
-		"url": ""
+		"url": "https://github.com/gulp-util/newer"
 	},
 	"bugs": {
-		"url": ""
+		"url": "https://github.com/gulp-util/newer/issues"
 	},
 	"contributors": [
 		"Tim Schaub <tim.schaub@gmail.com>",
