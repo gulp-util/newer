@@ -11,6 +11,15 @@ import type { Options } from "./types";
 
 const PLUGIN_NAME = "gulp-newer";
 
+function replaceExtension(file: string, ext: string) {
+	if (!ext) {
+		return file;
+	}
+	const original = path.extname(file);
+	const noExt = file.substring(0, file.length - original.length);
+	return noExt + ext;
+}
+
 class Newer extends Transform {
 	/**
 	 * Path to destination directory or file.
@@ -192,11 +201,7 @@ class Newer extends Transform {
 		) {
 			// stat dest/relative file
 			const relative = srcFile.relative;
-			const ext = path.extname(relative);
-			let destFileRelative = this._ext
-				? relative.substring(0, relative.length - ext.length) +
-				  this._ext
-				: relative;
+			let destFileRelative = replaceExtension(relative, this._ext);
 			if (this._map) {
 				destFileRelative = this._map(destFileRelative);
 			}
