@@ -204,6 +204,41 @@ class Newer extends Transform {
 		this.push(srcFile);
 	}
 
+	_specialStat(srcFile: File) {
+		// stat dest/relative file
+		const relative = srcFile.relative;
+		let destFileRelative = replaceExtension(relative, this._ext);
+		if (this._map) {
+			destFileRelative = this._map(destFileRelative);
+		}
+		const destFileJoined = this._dest
+			? path.join(this._dest, destFileRelative)
+			: destFileRelative;
+		try {
+			return fs.statSync(destFileJoined);
+		} catch (err) {
+			if (err.code !== "ENOENT") {
+				// unexpected error
+				throw err;
+			}
+			// dest file or directory doesn't exist, pass through all
+			return null;
+		}
+	}
+
+	_getDestStats(srcFile: File) {
+		const destDirectory = this._destStats && this._destStats.isDirectory();
+		if (destDirectory || this._ext || this._map) {
+			return this._specialStat(srcFile);
+		}
+		// wait to see if any are newer, then pass through all
+		if (!this._bufferedFiles) {
+			this._bufferedFiles = [];
+		}
+
+		return this._destStats;
+	}
+
 	push(chunk: any, encoding?: BufferEncoding): boolean {
 		try {
 			return super.push(chunk, encoding);
@@ -228,37 +263,8 @@ class Newer extends Transform {
 			);
 			return;
 		}
-		let destStats = this._destStats;
-		if (
-			(this._destStats && this._destStats.isDirectory()) ||
-			this._ext ||
-			this._map
-		) {
-			// stat dest/relative file
-			const relative = srcFile.relative;
-			let destFileRelative = replaceExtension(relative, this._ext);
-			if (this._map) {
-				destFileRelative = this._map(destFileRelative);
-			}
-			const destFileJoined = this._dest
-				? path.join(this._dest, destFileRelative)
-				: destFileRelative;
-			try {
-				destStats = fs.statSync(destFileJoined);
-			} catch (err) {
-				if (err.code !== "ENOENT") {
-					// unexpected error
-					throw err;
-				}
-				// dest file or directory doesn't exist, pass through all
-				destStats = null;
-			}
-		} else {
-			// wait to see if any are newer, then pass through all
-			if (!this._bufferedFiles) {
-				this._bufferedFiles = [];
-			}
-		}
+
+		const destStats = this._getDestStats(srcFile);
 
 		const newer = this._isNewer(destStats, srcFile.stat);
 
