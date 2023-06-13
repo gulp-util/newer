@@ -180,6 +180,30 @@ class Newer extends Transform {
 		return src[ts] > dest[ts];
 	}
 
+	_bufferPush(srcFile: File, newer: boolean) {
+		if (this._all) {
+			this.push(srcFile);
+			return;
+		}
+		if (!newer) {
+			this._bufferedFiles?.push(srcFile);
+			return;
+		}
+		if (!this._bufferedFiles) {
+			this.push(srcFile);
+			return;
+		}
+
+		// flush buffer
+		for (const file of this._bufferedFiles) {
+			this.push(file);
+		}
+		this._bufferedFiles.length = 0;
+		// pass through all remaining files as well
+		this._all = true;
+		this.push(srcFile);
+	}
+
 	push(chunk: any, encoding?: BufferEncoding): boolean {
 		try {
 			return super.push(chunk, encoding);
@@ -238,24 +262,8 @@ class Newer extends Transform {
 
 		const newer = this._isNewer(destStats, srcFile.stat);
 
-		if (this._all) {
-			this.push(srcFile);
-		} else if (!newer) {
-			if (this._bufferedFiles) {
-				this._bufferedFiles.push(srcFile);
-			}
-		} else {
-			if (this._bufferedFiles) {
-				// flush buffer
-				for (const file of this._bufferedFiles) {
-					this.push(file);
-				}
-				this._bufferedFiles.length = 0;
-				// pass through all remaining files as well
-				this._all = true;
-			}
-			this.push(srcFile);
-		}
+		this._bufferPush(srcFile, newer);
+
 		done();
 	}
 
