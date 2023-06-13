@@ -2,7 +2,7 @@
 	"name": "@gulp-util/newer",
 	"version": "0.0.1",
 	"description": "",
-	"license": "",
+	"license": "GPL-3.0",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/gulp-util/newer"
